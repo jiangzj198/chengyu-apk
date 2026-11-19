@@ -1,4 +1,3 @@
-
 name: 打包成语填空APK
 on:
   workflow_dispatch:
@@ -7,26 +6,15 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: 安装打包依赖
-        run: |
-          sudo apt update -y
-          sudo apt install -y zip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev cmake libffi-dev libssl-dev libltdl-dev
-          pip3 install --user buildozer==1.5.0 cython==0.29.36
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: 配置国内安卓镜像
-        run: |
-          mkdir -p ~/.buildozer
-          echo "[buildozer]" > ~/.buildozerrc
-          echo "android.sdk_path = /home/runner/.buildozer/android/platform/android-sdk" >> ~/.buildozerrc
-          echo "android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r28c" >> ~/.buildozerrc
-      - name: 开始打包APK
-        run: buildozer -v android debug accept_licenses
+      - name: 预配置打包环境+编译APK
+        uses: ArtemSBulgakov/buildozer-action@v1
+        with:
+          workdir: .
+          buildozer_command: buildozer android debug
         env:
-          ANDROID_HOME: /home/runner/.buildozer/android/platform/android-sdk
-          ANDROID_NDK_HOME: /home/runner/.buildozer/android/platform/android-ndk-r28c
-          P4A_ANDROID_MIRROR: https://mirrors.cloud.tencent.com/AndroidSDK/
           ANDROID_MIRROR: https://mirrors.cloud.tencent.com/AndroidSDK/
-      - name: 上传成品APK
+          P4A_ANDROID_MIRROR: https://mirrors.cloud.tencent.com/AndroidSDK/
+      - name: 上传成品安装包
         uses: actions/upload-artifact@v4
         with:
           name: 成语填空安装包
