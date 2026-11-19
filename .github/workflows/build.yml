@@ -1,0 +1,23 @@
+name: 打包成语填空APK
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: 安装打包依赖
+        run: |
+          sudo apt update -y
+          sudo apt install -y zip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev cmake libffi-dev libssl-dev
+          pip3 install --user buildozer cython
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: 开始打包APK
+        run: buildozer -v android debug
+        env:
+          ANDROID_MIRROR: https://mirrors.cloud.tencent.com/AndroidSDK/
+      - name: 上传成品APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: 成语填空安装包
+          path: bin/*.apk
