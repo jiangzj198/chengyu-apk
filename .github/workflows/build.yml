@@ -1,3 +1,4 @@
+
 name: 打包成语填空APK
 on:
   workflow_dispatch:
@@ -9,12 +10,21 @@ jobs:
       - name: 安装打包依赖
         run: |
           sudo apt update -y
-          sudo apt install -y zip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev cmake libffi-dev libssl-dev
-          pip3 install --user buildozer cython
+          sudo apt install -y zip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev cmake libffi-dev libssl-dev libltdl-dev
+          pip3 install --user buildozer==1.5.0 cython==0.29.36
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: 配置国内安卓镜像
+        run: |
+          mkdir -p ~/.buildozer
+          echo "[buildozer]" > ~/.buildozerrc
+          echo "android.sdk_path = /home/runner/.buildozer/android/platform/android-sdk" >> ~/.buildozerrc
+          echo "android.ndk_path = /home/runner/.buildozer/android/platform/android-ndk-r28c" >> ~/.buildozerrc
       - name: 开始打包APK
-        run: buildozer -v android debug
+        run: buildozer -v android debug accept_licenses
         env:
+          ANDROID_HOME: /home/runner/.buildozer/android/platform/android-sdk
+          ANDROID_NDK_HOME: /home/runner/.buildozer/android/platform/android-ndk-r28c
+          P4A_ANDROID_MIRROR: https://mirrors.cloud.tencent.com/AndroidSDK/
           ANDROID_MIRROR: https://mirrors.cloud.tencent.com/AndroidSDK/
       - name: 上传成品APK
         uses: actions/upload-artifact@v4
